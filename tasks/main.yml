@@ -120,3 +120,12 @@
     name: condor
     enabled: true
     state: started
+
+- name: Deploy HTCondor submit-node configuration
+  ansible.builtin.template:
+    src: 01-submit.config.j2
+    dest: "{{ htcondor_config_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart HTCondor
