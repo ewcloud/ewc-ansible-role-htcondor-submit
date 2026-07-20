@@ -1,3 +1,5 @@
 ---
 headscale_preauthkey: null
 headscale_login_server: null
+htcondor_cm_external_ip: null
+htcondor_password: null
