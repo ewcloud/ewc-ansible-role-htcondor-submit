@@ -132,3 +132,21 @@
     group: root
     mode: "0644"
   notify: Restart HTCondor
+
+- name: Gather package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: List installed package versions
+  ansible.builtin.debug:
+    msg:
+      - "tailscale: {{ ansible_facts.packages['tailscale'][0].version }}-{{ ansible_facts.packages['tailscale'][0].release }}"
+      - "htcondor: {{ ansible_facts.packages['htcondor-release'][0].version }}-{{ ansible_facts.packages['htcondor-release'][0].release }}"
+  when: ansible_facts['distribution'] == 'Rocky'
+
+- name: List installed package versions
+  ansible.builtin.debug:
+    msg:
+      - "tailscale: {{ ansible_facts.packages['tailscale'][0].version }}"
+      - "htcondor: {{ ansible_facts.packages['condor'][0].version }}"
+  when: ansible_facts['distribution'] == 'Ubuntu'
