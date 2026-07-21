@@ -22,36 +22,29 @@
   changed_when: false
   failed_when: false
 
-- name: Add Tailscale's apt signing key
+- name: Download the Tailscale bootstrap installer
   ansible.builtin.get_url:
-    url: "https://pkgs.tailscale.com/stable/{{ ansible_facts['distribution'] | lower }}/{{ ansible_facts['distribution_release'] }}.noarmor.gpg"
-    dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
-    mode: "0644"
+    url: https://tailscale.com/install.sh
+    dest: /tmp/tailscale_install.sh
+    mode: "0755"
     owner: root
     group: root
   when: tailscale_version.rc != 0
 
-- name: Add the Tailscale apt repository definition
-  ansible.builtin.get_url:
-    url: "https://pkgs.tailscale.com/stable/{{ ansible_facts['distribution'] | lower }}/{{ ansible_facts['distribution_release'] }}.tailscale.list"
-    dest: /etc/apt/sources.list.d/tailscale.list
-    mode: "0644"
-    owner: root
-    group: root
-  register: tailscale_repo
+- name: Install Tailscale client
+  ansible.builtin.command:
+    cmd: >-
+      /tmp/tailscale_install.sh
+  no_log: true
+  changed_when: true
   when: tailscale_version.rc != 0
 
-- name: Refresh apt cache after adding the Tailscale repository
-  ansible.builtin.apt:
-    update_cache: true
-  when: tailscale_repo is changed # noqa: no-handler
+- name: Remove the temporary Tailscale installer script
+  ansible.builtin.file:
+    path: /tmp/tailscale_install.sh
+    state: absent
 
-- name: Install the Tailscale package
-  ansible.builtin.apt:
-    name: tailscale
-    state: present
-
-- name: Ensure the tailscaled service is enabled and running
+- name: Ensure the Tailscale service is enabled and running
   ansible.builtin.systemd:
     name: tailscaled
     enabled: true
@@ -120,7 +113,7 @@
   changed_when: true
   when: condor_version.rc != 0
 
-- name: Remove the temporary installer script
+- name: Remove the temporary HTCondor installer script
   ansible.builtin.file:
     path: /tmp/get_htcondor.sh
     state: absent
