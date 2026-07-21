@@ -6,6 +6,16 @@
     fail_msg: "Supports RockyLinux 8 or 9 and Ubuntu 22 or 24. Detected: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_major_version'] }}."
     success_msg: "Running supported {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_major_version'] }} distribution."
 
+- name: Validate user inputs
+  ansible.builtin.assert:
+    that:
+      - headscale_preauthkey is string and headscale_preauthkey is defined and headscale_preauthkey != ''
+      - headscale_login_server is string and headscale_login_server is defined and headscale_login_server != ''
+      - htcondor_cm_external_ip is string and htcondor_cm_external_ip is defined and htcondor_cm_external_ip != ''
+      - htcondor_password is string and htcondor_password is defined and htcondor_password != ''
+    fail_msg: "Input validation failed. See README.md for information on required inputs and their format."
+    success_msg: "User input configuration is valid."
+
 - name: Check whether the Tailscale package is already present
   ansible.builtin.command: tailscale version
   register: tailscale_version
