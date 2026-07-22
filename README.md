@@ -85,12 +85,24 @@ ansible-playbook -i inventory.yml playbook.yml
 
 ## SW Bill of Materials (SBoM)
 
-The following components will be included in the resulting environment:
+Third-party components used in the resulting environment.
 
+### RockyLinux 8 Environment
+
+The following components will be included in the resulting environment:
 
 | Component | Version | License | Home URL |
 |------|---------|---------|--------------|
-| tailscale | 1.x | BSD-3-Clause | https://github.com/tailscale/tailscale |
+| tailscale | 1.98 | BSD-3-Clause | https://github.com/tailscale/tailscale |
+| htcondor | 25.x | Apache-2.0  | https://github.com/htcondor/htcondor |
+
+### RockyLinux 9 Environment
+
+The following components will be included in the resulting environment:
+
+| Component | Version | License | Home URL |
+|------|---------|---------|--------------|
+| tailscale | 1.98 | BSD-3-Clause | https://github.com/tailscale/tailscale |
 | htcondor | 25.x | Apache-2.0  | https://github.com/htcondor/htcondor |
 
 ## Changelog
