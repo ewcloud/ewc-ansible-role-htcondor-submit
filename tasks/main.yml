@@ -16,6 +16,10 @@
     fail_msg: "Input validation failed. See README.md for information on required inputs and their format."
     success_msg: "User input configuration is valid."
 
+- name: Gather installed package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
 - name: Check whether the Tailscale package is already present
   ansible.builtin.command: tailscale version
   register: tailscale_version
@@ -89,12 +93,6 @@
     path: "{{ tailscale_authkey_file }}"
     state: absent
 
-- name: Check whether HTCondor is already installed
-  ansible.builtin.command: condor_version
-  register: condor_version
-  changed_when: false
-  failed_when: false
-
 - name: Download the HTCondor bootstrap installer
   ansible.builtin.get_url:
     url: https://get.htcondor.org
@@ -102,7 +100,7 @@
     mode: "0755"
     owner: root
     group: root
-  when: condor_version.rc != 0
+  when: "'condor' not in ansible_facts.packages"
 
 - name: Install HTCondor as a submit node
   ansible.builtin.command:
@@ -111,7 +109,7 @@
       --password "{{ htcondor_password }}"
   no_log: true
   changed_when: true
-  when: condor_version.rc != 0
+  when: "'condor' not in ansible_facts.packages"
 
 - name: Remove the temporary HTCondor installer script
   ansible.builtin.file:
@@ -142,11 +140,3 @@
     msg:
       - "tailscale: {{ ansible_facts.packages['tailscale'][0].version }}-{{ ansible_facts.packages['tailscale'][0].release }}"
       - "htcondor: {{ ansible_facts.packages['htcondor-release'][0].version }}-{{ ansible_facts.packages['htcondor-release'][0].release }}"
-  when: ansible_facts['distribution'] == 'Rocky'
-
-- name: List installed package versions
-  ansible.builtin.debug:
-    msg:
-      - "tailscale: {{ ansible_facts.packages['tailscale'][0].version }}"
-      - "htcondor: {{ ansible_facts.packages['condor'][0].version }}"
-  when: ansible_facts['distribution'] == 'Ubuntu'
