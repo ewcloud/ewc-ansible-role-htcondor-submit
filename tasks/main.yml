@@ -1,0 +1,142 @@
+---
+- name: Verify Linux distribution
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['distribution'] == 'Rocky' and ansible_facts['distribution_major_version'] in ['8', '9']
+    fail_msg: "Supports RockyLinux 8 or 9. Detected: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_major_version'] }}."
+    success_msg: "Running supported {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_major_version'] }} distribution."
+
+- name: Validate user inputs
+  ansible.builtin.assert:
+    that:
+      - headscale_preauthkey is string and headscale_preauthkey is defined and headscale_preauthkey != ''
+      - headscale_login_server is string and headscale_login_server is defined and headscale_login_server != ''
+      - htcondor_cm_external_ip is string and htcondor_cm_external_ip is defined and htcondor_cm_external_ip != ''
+      - htcondor_password is string and htcondor_password is defined and htcondor_password != ''
+    fail_msg: "Input validation failed. See README.md for information on required inputs and their format."
+    success_msg: "User input configuration is valid."
+
+- name: Gather installed package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Check whether the Tailscale package is already present
+  ansible.builtin.command: tailscale version
+  register: tailscale_version
+  changed_when: false
+  failed_when: false
+
+- name: Download the Tailscale bootstrap installer
+  ansible.builtin.get_url:
+    url: https://tailscale.com/install.sh
+    dest: /tmp/tailscale_install.sh
+    mode: "0755"
+    owner: root
+    group: root
+  when: tailscale_version.rc != 0
+
+- name: Install Tailscale client
+  ansible.builtin.command:
+    cmd: >-
+      /tmp/tailscale_install.sh
+  no_log: true
+  changed_when: true
+  when: tailscale_version.rc != 0
+
+- name: Remove the temporary Tailscale installer script
+  ansible.builtin.file:
+    path: /tmp/tailscale_install.sh
+    state: absent
+
+- name: Ensure the Tailscale service is enabled and running
+  ansible.builtin.systemd:
+    name: tailscaled
+    enabled: true
+    state: started
+
+- name: Check current Tailscale connection state
+  ansible.builtin.command: tailscale status --json
+  register: tailscale_status
+  changed_when: false
+  failed_when: false
+
+- name: Determine whether enrollment is required
+  ansible.builtin.set_fact:
+    tailscale_needs_enrollment: >-
+      {{
+        tailscale_status.rc != 0 or
+        (tailscale_status.stdout | from_json).BackendState != 'Running'
+      }}
+
+- name: Write the Headscale pre-auth key to a transient, root-only file
+  ansible.builtin.copy:
+    content: "{{ headscale_preauthkey }}"
+    dest: "{{ tailscale_authkey_file }}"
+    mode: "0600"
+    owner: root
+    group: root
+  no_log: true
+  when: tailscale_needs_enrollment
+
+- name: Enroll node into the Headscale VPN server
+  ansible.builtin.command:
+    cmd: >-
+      tailscale up
+      --login-server {{ headscale_login_server }}
+      --authkey file:{{ tailscale_authkey_file }}
+  no_log: true
+  changed_when: true
+  when: tailscale_needs_enrollment
+
+- name: Remove the transient pre-auth key file
+  ansible.builtin.file:
+    path: "{{ tailscale_authkey_file }}"
+    state: absent
+
+- name: Download the HTCondor bootstrap installer
+  ansible.builtin.get_url:
+    url: https://get.htcondor.org
+    dest: /tmp/get_htcondor.sh
+    mode: "0755"
+    owner: root
+    group: root
+  when: "'condor' not in ansible_facts.packages"
+
+- name: Install HTCondor as a submit node
+  ansible.builtin.command:
+    cmd: >-
+      /tmp/get_htcondor.sh --no-dry-run --submit "{{ htcondor_cm_external_ip }}"
+      --password "{{ htcondor_password }}"
+  no_log: true
+  changed_when: true
+  when: "'condor' not in ansible_facts.packages"
+
+- name: Remove the temporary HTCondor installer script
+  ansible.builtin.file:
+    path: /tmp/get_htcondor.sh
+    state: absent
+
+- name: Ensure the condor service is enabled and started
+  ansible.builtin.systemd:
+    name: condor
+    enabled: true
+    state: started
+
+- name: Deploy HTCondor submit-node configuration
+  ansible.builtin.template:
+    src: 01-submit.config.j2
+    dest: "{{ htcondor_config_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart HTCondor
+
+- name: Gather package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: List installed package versions
+  ansible.builtin.debug:
+    msg:
+      - "tailscale: {{ ansible_facts.packages['tailscale'][0].version }}-{{ ansible_facts.packages['tailscale'][0].release }}"
+      - "htcondor: {{ ansible_facts.packages['htcondor-release'][0].version }}-{{ ansible_facts.packages['htcondor-release'][0].release }}"

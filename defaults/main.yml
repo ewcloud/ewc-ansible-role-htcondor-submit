@@ -1,0 +1,8 @@
+---
+tailscale_authkey_file: /run/tailscale-authkey
+htcondor_config_path: /etc/condor/config.d/01-submit.config
+htcondor_network_interface: tailscale0
+htcondor_submit_requirement_name: NotAllowedUniverse
+htcondor_submit_requirement_expression: "JobUniverse == 5"
+htcondor_admin_users:
+  - murdaca

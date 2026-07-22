@@ -1,0 +1,19 @@
+# Settings that can only be changed by an administrator via the persistent
+# config mechanism (condor_config_val -set), rather than by any submitting user.
+SETTABLE_ATTRS_ADMINISTRATOR = CONDOR_HOST, NETWORK_INTERFACE, BIND_ALL_INTERFACES, NUM_SLOTS, NUM_SLOTS_*, SLOT_*, CONSUMPTION_*, MACHINE_RESOURCE_*, *_LIMIT, CONCURRENCY_LIMIT_DEFAULT, ALLOW_READ, ALLOW_WRITE, CONDOR_ADMIN, ALLOW_ADMINISTRATOR, ALLOW_CONFIG, ENABLE_PERSISTENT_CONFIG, PERSISTENT_CONFIG_DIR
+
+CONDOR_HOST = {{ htcondor_cm_external_ip }}
+NETWORK_INTERFACE = {{ htcondor_network_interface }}
+BIND_ALL_INTERFACES = false
+
+ALLOW_ADMINISTRATOR = {{ htcondor_admin_users | map('regex_replace', '^(.*)$', '\1@*') | join(', ') }}, condor@$(TRUST_DOMAIN)
+ALLOW_WRITE = *@$(FULL_HOSTNAME), condor@$(TRUST_DOMAIN)
+CONDOR_ADMIN = {{ htcondor_admin_users[0] }}@$(FULL_HOSTNAME)
+QUEUE_SUPER_USERS = {{ htcondor_admin_users | join(', ') }}, condor
+
+ENABLE_PERSISTENT_CONFIG = true
+PERSISTENT_CONFIG_DIR = /etc/condor/persistent
+
+# Used to allow jobs that do not satisfy certain submit conditions.
+SUBMIT_REQUIREMENT_NAMES = {{ htcondor_submit_requirement_name }}
+SUBMIT_REQUIREMENT_{{ htcondor_submit_requirement_name }} = {{ htcondor_submit_requirement_expression }}

@@ -1,0 +1,5 @@
+---
+- name: Restart HTCondor
+  ansible.builtin.systemd:
+    name: condor
+    state: restarted
