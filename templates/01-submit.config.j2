@@ -1,8 +1,9 @@
+CONDOR_HOST = {{ htcondor_cm_external_ip }}
+# For details, run condor_config_val use role:get_htcondor_submit
 use role:get_htcondor_submit
 
 SETTABLE_ATTRS_ADMINISTRATOR = CONDOR_HOST, NETWORK_INTERFACE, BIND_ALL_INTERFACES, NUM_SLOTS, NUM_SLOTS_*, SLOT_*, CONSUMPTION_*, MACHINE_RESOURCE_*, *_LIMIT, CONCURRENCY_LIMIT_DEFAULT, ALLOW_READ, ALLOW_WRITE, CONDOR_ADMIN, ALLOW_ADMINISTRATOR, ALLOW_CONFIG, ENABLE_PERSISTENT_CONFIG, PERSISTENT_CONFIG_DIR
 
-CONDOR_HOST = {{ htcondor_cm_external_ip }}
 NETWORK_INTERFACE = {{ htcondor_network_interface }}
 BIND_ALL_INTERFACES = false
 
