@@ -41,7 +41,7 @@
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: present
-    allow_downgrade: true    
+    allow_downgrade: true
   loop:
     - "{{ package_versions['rockylinux_' + ansible_facts['distribution_major_version']]['tailscale'] }}"
 
