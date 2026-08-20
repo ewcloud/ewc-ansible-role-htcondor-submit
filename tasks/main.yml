@@ -101,9 +101,7 @@
 
 - name: Install HTCondor as a submit node
   ansible.builtin.command:
-    cmd: >-
-      /tmp/get_htcondor.sh --no-dry-run --submit "{{ htcondor_cm_external_ip }}"
-      --password "{{ htcondor_password }}"
+    cmd: /tmp/get_htcondor.sh --no-dry-run --submit "{{ htcondor_cm_external_ip }}" --password "{{ htcondor_password }}"
   no_log: true
   changed_when: true
   when: "'condor' not in ansible_facts.packages"
