@@ -16,14 +16,6 @@
     fail_msg: "Input validation failed. See README.md for information on required inputs and their format."
     success_msg: "User input configuration is valid."
 
-- name: Pin package versions prior to installation
-  ansible.builtin.set_fact:
-    package_versions:
-      rockylinux_8:
-        tailscale: tailscale-1.98.9-1
-      rockylinux_9:
-        tailscale: tailscale-1.98.9-1
-
 - name: Gather installed package facts
   ansible.builtin.package_facts:
     manager: auto
@@ -46,9 +38,9 @@
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: present
-    allow_downgrade: true
+    allow_downgrade: false
   loop:
-    - "{{ package_versions['rockylinux_' + ansible_facts['distribution_major_version']]['tailscale'] }}"
+    - tailscale
 
 - name: Ensure the tailscaled service is enabled and running
   ansible.builtin.systemd:
