@@ -16,14 +16,6 @@
     fail_msg: "Input validation failed. See README.md for information on required inputs and their format."
     success_msg: "User input configuration is valid."
 
-- name: Pin package versions prior to installation
-  ansible.builtin.set_fact:
-    package_versions:
-      rockylinux_8:
-        tailscale: tailscale-1.98.9-1
-      rockylinux_9:
-        tailscale: tailscale-1.98.9-1
-
 - name: Gather installed package facts
   ansible.builtin.package_facts:
     manager: auto
@@ -46,9 +38,9 @@
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: present
-    allow_downgrade: true
+    allow_downgrade: false
   loop:
-    - "{{ package_versions['rockylinux_' + ansible_facts['distribution_major_version']]['tailscale'] }}"
+    - tailscale
 
 - name: Ensure the tailscaled service is enabled and running
   ansible.builtin.systemd:
@@ -140,3 +132,18 @@
     msg:
       - "tailscale: {{ ansible_facts.packages['tailscale'][0].version }}-{{ ansible_facts.packages['tailscale'][0].release }}"
       - "htcondor: {{ ansible_facts.packages['htcondor-release'][0].version }}-{{ ansible_facts.packages['htcondor-release'][0].release }}"
+
+- name: Temporary setup Trivy for SBOM auto-generation (standalone binary file at /tmp/trivy)
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /tmp
+    creates: /tmp/trivy
+  args:
+    executable: /bin/bash
+
+- name: Auto-generate SBOM (SPDX file at /sbom.json)
+  ansible.builtin.command:
+    cmd: ./trivy rootfs --pkg-types os --format spdx-json --output /sbom.json --scanners vuln /
+    chdir: /tmp
+  changed_when: true

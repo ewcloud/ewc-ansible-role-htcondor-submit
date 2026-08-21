@@ -82,28 +82,14 @@ ansible-playbook -i inventory.yml playbook.yml
 | htcondor_cm_external_ip     | IP Address of the HTCondor Manager node to which this submit node reports to. Example: `10.0.0.15` | `string` | n/a      |    yes   |
 | htcondor_password           | Password to authenticate against HTCondor Execute node pool                                        | `string` | n/a      |    yes   |
 
-
-## SW Bill of Materials (SBoM)
-
+## Dependencies
+> 💡 Upon execution, a SBOM (SPDX format) is auto-generated and stored in the VM's file system root directory (see `/sbom.json`).
 Third-party components used in the resulting environment.
 
-### RockyLinux 8 Environment
-
-The following components will be included in the resulting environment:
-
-| Component | Version | License | Home URL |
-|------|---------|---------|--------------|
-| tailscale | 1.98 | BSD-3-Clause | https://github.com/tailscale/tailscale |
-| htcondor | 25.x | Apache-2.0  | https://github.com/htcondor/htcondor |
-
-### RockyLinux 9 Environment
-
-The following components will be included in the resulting environment:
-
-| Component | Version | License | Home URL |
-|------|---------|---------|--------------|
-| tailscale | 1.98 | BSD-3-Clause | https://github.com/tailscale/tailscale |
-| htcondor | 25.x | Apache-2.0  | https://github.com/htcondor/htcondor |
+| Component |  Home URL |
+|------|---------|
+| tailscale | https://github.com/tailscale/tailscale |
+| htcondor | https://github.com/htcondor/htcondor |
 
 ## Changelog
 All notable changes (i.e. fixes, features and breaking changes) are documented 
