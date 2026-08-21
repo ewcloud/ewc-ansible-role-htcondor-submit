@@ -28,6 +28,11 @@
   ansible.builtin.package_facts:
     manager: auto
 
+- name: Ensure dnf-plugins-core is enabled
+  ansible.builtin.dnf:
+    name: dnf-plugins-core
+    state: present
+
 - name: Add the Tailscale yum repository definition
   ansible.builtin.get_url:
     url: "https://pkgs.tailscale.com/stable/rhel/{{ ansible_facts['distribution_major_version'] }}/tailscale.repo"
