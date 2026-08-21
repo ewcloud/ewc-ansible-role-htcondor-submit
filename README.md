@@ -5,7 +5,7 @@ This repository contains a configuration template
 to customize your environment in the
 [European Weather Cloud (EWC)](https://europeanweather.cloud/).
 The template is designed to:
-* Configure a pre-existing virtual machine, running RockyLinux version 8 or 9 and with a minimum recommended 4 CPU cores and 8GB of RAM, such that it:
+* Configure a pre-existing virtual machine, running RockyLinux version 8 or 9 and with a minimum recommended 8 CPU cores and 32GB of RAM, such that it:
     * Enables users to submit their compute jobs to a shared pool of HTCondor Execute nodes running within the EWC.
 
 ## Copyright and License
