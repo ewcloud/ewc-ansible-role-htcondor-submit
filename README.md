@@ -5,7 +5,7 @@ This repository contains a configuration template
 to customize your environment in the
 [European Weather Cloud (EWC)](https://europeanweather.cloud/).
 The template is designed to:
-* Configure a pre-existing virtual machine, running RockyLinux version 8 or 9 and with a minimum recommended 4 CPU cores and 8GB of RAM, such that it:
+* Configure a pre-existing virtual machine, running RockyLinux version 8 or 9 and with a minimum recommended 8 CPU cores and 32GB of RAM, such that it:
     * Enables users to submit their compute jobs to a shared pool of HTCondor Execute nodes running within the EWC.
 
 ## Copyright and License
@@ -85,12 +85,24 @@ ansible-playbook -i inventory.yml playbook.yml
 
 ## SW Bill of Materials (SBoM)
 
-The following components will be included in the resulting environment:
+Third-party components used in the resulting environment.
 
+### RockyLinux 8 Environment
+
+The following components will be included in the resulting environment:
 
 | Component | Version | License | Home URL |
 |------|---------|---------|--------------|
-| tailscale | 1.x | BSD-3-Clause | https://github.com/tailscale/tailscale |
+| tailscale | 1.98 | BSD-3-Clause | https://github.com/tailscale/tailscale |
+| htcondor | 25.x | Apache-2.0  | https://github.com/htcondor/htcondor |
+
+### RockyLinux 9 Environment
+
+The following components will be included in the resulting environment:
+
+| Component | Version | License | Home URL |
+|------|---------|---------|--------------|
+| tailscale | 1.98 | BSD-3-Clause | https://github.com/tailscale/tailscale |
 | htcondor | 25.x | Apache-2.0  | https://github.com/htcondor/htcondor |
 
 ## Changelog
