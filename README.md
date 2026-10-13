@@ -78,9 +78,10 @@ ansible-playbook -i inventory.yml playbook.yml
 | Name                        | Description                                                                                        | Type     | Default  | Required |
 | --------------------------- | ----------------------------------------------------------------------------------------------     | -------- | -------- | :------: |
 | headscale_login_server      | URI of the VPN server.  Example: `https://headscale.example.org`                                   | `string` | n/a      |    yes   |
-| headscale_preauthkey        | Credentials of the VPN server.                                                                     | `string` | n/a      |    yes   |
+| headscale_preauthkey        | Credentials of the VPN server                                                                      | `string` | n/a      |    yes   |
 | htcondor_cm_external_ip     | IP Address of the HTCondor Manager node to which this submit node reports to. Example: `10.0.0.15` | `string` | n/a      |    yes   |
 | htcondor_password           | Password to authenticate against HTCondor Execute node pool                                        | `string` | n/a      |    yes   |
+| htcondor_reinstall          | Force HTCondor re-install. Only `yes` will be accepted to approve                                  | `string` | `no`     |    no    |
 
 ## Dependencies
 > 💡 Upon execution, a SBOM (SPDX format) is auto-generated and stored in the VM's file system root directory (see `/sbom.json`).
