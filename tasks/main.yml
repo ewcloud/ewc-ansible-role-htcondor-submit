@@ -13,6 +13,7 @@
       - headscale_login_server is string and headscale_login_server is defined and headscale_login_server != ''
       - htcondor_cm_external_ip is string and htcondor_cm_external_ip is defined and htcondor_cm_external_ip != ''
       - htcondor_password is string and htcondor_password is defined and htcondor_password != ''
+      - htcondor_reinstall is string and htcondor_reinstall is defined and htcondor_reinstall != ''
     fail_msg: "Input validation failed. See README.md for information on required inputs and their format."
     success_msg: "User input configuration is valid."
 
@@ -87,6 +88,19 @@
     path: "{{ tailscale_authkey_file }}"
     state: absent
 
+- name: Force uninstall condor package while keeping its dependencies
+  ansible.builtin.dnf:
+    name: condor
+    state: absent
+    autoremove: false
+  when: htcondor_reinstall == "yes"
+
+- name: Delete left-over condor config files
+  ansible.builtin.file:
+    path: /etc/condor
+    state: absent
+  when: htcondor_reinstall == "yes"
+
 - name: Download the HTCondor bootstrap installer
   ansible.builtin.get_url:
     url: https://get.htcondor.org
@@ -94,14 +108,16 @@
     mode: "0755"
     owner: root
     group: root
-  when: "'condor' not in ansible_facts.packages"
+  when:
+    - "'condor' not in ansible_facts.packages or htcondor_reinstall == 'yes'"
 
 - name: Install HTCondor as a submit node
   ansible.builtin.command:
-    cmd: /tmp/get_htcondor.sh --no-dry-run --submit "{{ htcondor_cm_external_ip }}" --password "{{ htcondor_password }}"
+    cmd: /tmp/get_htcondor.sh --no-dry-run --channel stable --submit "{{ htcondor_cm_external_ip }}" --password "{{ htcondor_password }}"
   no_log: true
   changed_when: true
-  when: "'condor' not in ansible_facts.packages"
+  when:
+    - "'condor' not in ansible_facts.packages or htcondor_reinstall == 'yes'"
 
 - name: Remove the temporary installer script
   ansible.builtin.file:
