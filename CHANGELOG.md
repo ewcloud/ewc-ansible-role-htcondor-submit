@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0](https://github.com/ewcloud/ewc-ansible-role-htcondor-submit/compare/1.1.0...1.2.0) (2026-10-13)
+
+
+### Features
+
+* Allow forced HTCondor (stable) reinstallationa/reconfiguration ([#4](https://github.com/ewcloud/ewc-ansible-role-htcondor-submit/issues/4)) ([d313f03](https://github.com/ewcloud/ewc-ansible-role-htcondor-submit/commit/d313f037596d8b2ee7662212079f5c5cdd2f618f))
+
 # [1.1.0](https://github.com/ewcloud/ewc-ansible-role-htcondor-submit/compare/1.0.0...1.1.0) (2026-08-21)
 
 
