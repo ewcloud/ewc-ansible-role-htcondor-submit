@@ -14,8 +14,64 @@
       - htcondor_cm_external_ip is string and htcondor_cm_external_ip is defined and htcondor_cm_external_ip != ''
       - htcondor_password is string and htcondor_password is defined and htcondor_password != ''
       - htcondor_reinstall is string and htcondor_reinstall is defined and htcondor_reinstall != ''
+      - tenancy_name is defined and tenancy_name is string and tenancy_name is match('^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$')
     fail_msg: "Input validation failed. See README.md for information on required inputs and their format."
     success_msg: "User input configuration is valid."
+
+- name: Forge new target host FQDN
+  ansible.builtin.set_fact:
+    target_short_name: "{{ ansible_facts['hostname'] }}"
+    target_fqdn: "{{ ansible_facts['hostname'] }}.{{ tenancy_name }}.ewc"
+
+- name: Validating new target host FQDN
+  ansible.builtin.assert:
+    that:
+      - target_fqdn | length <= 64  # static hostname limit
+    fail_msg: "Target hostname and fully qualified domain domain name validation failed."
+    success_msg: "Target hostname and fully qualified domain name configuration is valid."
+
+- name: Remove legacy .novalocal FQDN suffix from /etc/hosts
+  ansible.builtin.replace:
+    path: /etc/hosts
+    regexp: '[ \t]+{{ target_short_name | regex_escape }}\.novalocal(?=[ \t]|$)'
+    replace: ''
+
+- name: Ensure /etc/hosts maps the FQDN
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1\s'
+    line: "127.0.1.1 {{ target_fqdn }} {{ target_short_name }}"
+
+- name: Set static hostname to the FQDN
+  ansible.builtin.hostname:
+    name: "{{ target_fqdn }}"
+    use: systemd
+
+- name: Stop cloud-init from resetting hostname / hosts
+  ansible.builtin.copy:
+    content: |
+      # Managed by Ansible
+      preserve_hostname: true
+      manage_etc_hosts: false
+    dest: /etc/cloud/cloud.cfg.d/99_preserve_hostname.cfg
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Verify hostname and FQDN reconciliation
+  ansible.builtin.command: "{{ item }}"
+  loop:
+    - "hostnamectl --static"
+    - "hostname -f"
+  register: hostname_results
+  changed_when: false
+  failed_when: hostname_results.stdout != target_fqdn
+
+- name: Warn if user-data overrides the drop-in
+  ansible.builtin.command: grep -qs "manage_etc_hosts' as True" /etc/hosts
+  register: cloudinit_hosts
+  changed_when: false
+  failed_when: cloudinit_hosts.rc == 0
 
 - name: Gather installed package facts
   ansible.builtin.package_facts:
