@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/ewcloud/ewc-ansible-role-htcondor-submit/compare/1.2.0...1.3.0) (2026-10-14)
+
+
+### Features
+
+* User-defined target vm fully qualified domain name ([#5](https://github.com/ewcloud/ewc-ansible-role-htcondor-submit/issues/5)) ([0d07533](https://github.com/ewcloud/ewc-ansible-role-htcondor-submit/commit/0d0753347a997ec1161b4c55878d3a6eea530595))
+
 # [1.2.0](https://github.com/ewcloud/ewc-ansible-role-htcondor-submit/compare/1.1.0...1.2.0) (2026-10-13)
 
 
