@@ -30,12 +30,6 @@
     fail_msg: "Target hostname and fully qualified domain domain name validation failed."
     success_msg: "Target hostname and fully qualified domain name configuration is valid."
 
-- name: Debug
-  ansible.builtin.debug:
-    msg:
-      - "target_short_name: '{{ target_short_name }}'"
-      - "target_fqdn: '{{ target_fqdn }}'"
-
 - name: Remove legacy .novalocal FQDN suffix from /etc/hosts
   ansible.builtin.replace:
     path: /etc/hosts
